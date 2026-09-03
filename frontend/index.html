@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smriti-NER | AI Elderly Dementia Cognitive Platform (SIH26003)</title>
+  <meta name="description" content="Smriti-NER: An AI-enabled, culturally inclusive cognitive gaming, memory training, and clinical telemetry platform for elderly dementia care in the North Eastern Region.">
+  
+  <!-- Typography: High-legibility Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css?v=4">
+</head>
+<body class="theme-warm">
+
+  <!-- TOP PERSISTENT NAVIGATION BAR -->
+  <header class="app-header" role="banner">
+    <div class="header-container">
+      <div class="brand-section">
+        <div class="brand-logo" aria-label="Smriti NER Logo">
+          <span class="logo-icon">🌿</span>
+          <div class="brand-text">
+            <h1 class="brand-title">Smriti-NER <span class="badge-sih">SIH26003</span></h1>
+            <p class="brand-subtitle">AI Dementia Cognitive Platform · North Eastern Region Care</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Connectivity & Offline Badge -->
+      <div class="header-offline-status" title="Low-connectivity edge storage active">
+        <span class="pulse-dot">🟢</span>
+        <span class="offline-text" id="syncStatusText">Offline-Ready (Edge Sync Active)</span>
+      </div>
+
+      <!-- Live Session & Profile Meta (Shown when logged in) -->
+      <div class="header-controls" id="headerControlsAuth">
+        
+        <!-- Live Cumulative Session Timer -->
+        <div class="session-timer-card" id="sessionTimerCard" title="Live Cumulative Session Duration">
+          <span class="timer-icon" aria-hidden="true">⏱️</span>
+          <div class="timer-details">
+            <span class="timer-label">Session</span>
+            <span class="timer-value" id="liveSessionTime">00:00:00</span>
+          </div>
+        </div>
+
+        <!-- Current User Profile Badge -->
+        <div class="current-user-card" id="currentUserDisplay">
+          <span class="user-avatar" id="navUserAvatar">👴</span>
+          <div class="user-meta">
+            <span class="user-name" id="navUserName">Bhaben Baruah</span>
+            <span class="user-role-badge" id="navUserRole">Patient (Jorhat)</span>
+          </div>
+        </div>
+
+        <!-- Daily Reminders Shortcut Pill -->
+        <button class="btn-nav btn-reminders-nav" id="btnNavReminders" title="View Daily Reminders (Meds, Hydration, Schedule)" aria-label="Daily Reminders">
+          <span class="rem-icon-badge">💊</span>
+          <span class="btn-text" data-i18n="nav_reminders">Reminders</span>
+          <span class="msg-count-pill pill-amber" id="navRemCount" style="display:none;">0</span>
+        </button>
+
+        <!-- Messages Shortcut Badge -->
+        <button class="btn-nav btn-msg-nav" id="btnNavMessages" title="View Doctor-Patient Messages" aria-label="Messages">
+          <span class="msg-icon-badge">✉️</span>
+          <span class="btn-text" data-i18n="nav_doctor_note">Doctor Note</span>
+          <span class="msg-count-pill" id="navMsgCount" style="display:none;">0</span>
+        </button>
+
+        <div class="nav-actions">
+          <!-- Multilingual Voice Selector -->
+          <div class="lang-selector-wrap">
+            <span class="lang-icon">🌐</span>
+            <select id="selectLanguage" class="lang-dropdown" aria-label="Language and Voice Selector">
+              <option value="en">English (NER Standard Audio)</option>
+              <option value="hi">Hindi (हिन्दी North & Central)</option>
+              <option value="as">Assamese (অসমীয়া Audio Guide)</option>
+              <option value="bn">Bengali (বাংলা Audio Guide)</option>
+              <option value="brx">Bodo (बड़ो Audio Guide)</option>
+              <option value="mni">Manipuri (মৈতৈলোন্ Audio Guide)</option>
+              <option value="kha">Khasi (Meghalaya Audio Guide)</option>
+            </select>
+          </div>
+
+          <!-- Spoken Voice Assistant Button -->
+          <button class="btn-nav btn-voice-assistant" id="btnVoiceAssistantTrigger" title="Spoken Voice Assistant / बोलकर बात करें" aria-label="Open Voice Assistant">
+            <span class="va-btn-icon">🎙️</span>
+            <span class="btn-text" data-i18n="nav_voice_assistant">Voice Assistant</span>
+          </button>
+
+          <button class="btn-nav" id="btnAudioToggle" title="Toggle Spoken Voice Guide" aria-label="Toggle Audio Guide">
+            <span id="audioIcon">🔊</span>
+            <span class="btn-text" data-i18n="nav_voice">Voice</span>
+          </button>
+          <button class="btn-nav btn-contrast" id="btnContrastToggle" title="Toggle High Contrast Mode" aria-label="Toggle High Contrast">
+            <span>👁️</span>
+            <span class="btn-text" data-i18n="nav_contrast">Contrast</span>
+          </button>
+          <button class="btn-nav btn-logout" id="btnLogout" aria-label="Log Out of Smriti-NER">
+            <span>🚪</span>
+            <span class="btn-text" data-i18n="nav_logout">Log Out</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Header controls when in logged out state -->
+      <div class="header-controls-loggedout" id="headerControlsGuest" style="display:none;">
+        <div class="lang-selector-wrap">
+          <span class="lang-icon">🌐</span>
+          <select id="selectLanguageGuest" class="lang-dropdown" aria-label="Language Selector">
+            <option value="en">English</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+            <option value="as">অসমীয়া (Assamese)</option>
+            <option value="bn">বাংলা (Bengali)</option>
+            <option value="brx">बड़ो (Bodo)</option>
+            <option value="mni">মৈতৈलोन् (Manipuri)</option>
+            <option value="kha">Khasi</option>
+          </select>
+        </div>
+        <button class="btn-nav" id="btnAudioToggleGuest" title="Toggle Voice Guide">🔊 Voice</button>
+        <button class="btn-nav btn-contrast" id="btnContrastToggleGuest" title="Toggle High Contrast">👁️ Contrast</button>
+        <button class="btn-nav btn-primary-nav" id="btnShowAuthModal">🔑 Sign In / Sign Up</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN APPLICATION VIEWPORT -->
+  <main id="appMain" class="main-content" role="main">
+    
+    <!-- VIEW 0: AUTHENTICATION PORTAL (LOGIN & SIGN UP) -->
+    <section id="viewAuthPortal" class="view-section">
+      <div class="auth-portal-wrapper">
+        <div class="auth-banner-side">
+          <span class="auth-leaf-icon">🌿</span>
+          <h2 class="auth-hero-title">AI Cognitive Care & Memory Assistance</h2>
+          <p class="auth-hero-sub">Welcome to Smriti-NER, an AI-enabled cognitive platform addressing dementia and memory decline across the North Eastern Region of India (SIH26003).</p>
+          
+          <div class="auth-features-list">
+            <div class="auth-feature-item">
+              <span class="f-icon">🧠</span>
+              <div>
+                <strong>AI Adaptive Gaming & Memory Training</strong>
+                <p>Dynamic difficulty tiers that adjust to latency and motor stability without anxiety.</p>
+              </div>
+            </div>
+            <div class="auth-feature-item">
+              <span class="f-icon">💊</span>
+              <div>
+                <strong>Smart Daily Living Reminders</strong>
+                <p>Auditory alerts for medicines, hydration, daily routines, and doctor appointments.</p>
+              </div>
+            </div>
+            <div class="auth-feature-item">
+              <span class="f-icon">🩺</span>
+              <div>
+                <strong>Doctor Telemetry & Clinical Messaging</strong>
+                <p>MoCA proxy analysis, hesitation tracking, and direct patient communication.</p>
+              </div>
+            </div>
+            <div class="auth-feature-item">
+              <span class="f-icon">📶</span>
+              <div>
+                <strong>Offline-Ready Low-Connectivity Sync</strong>
+                <p>Works seamlessly in remote rural hills with automatic local edge synchronization.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Auth Card with Tabs (Sign In / Sign Up) -->
+        <div class="auth-card-main">
+          
+          <!-- Multilingual Language Switcher Bar -->
+          <div class="auth-lang-bar">
+            <span class="auth-lang-prompt">🌐 Language / भाषा:</span>
+            <div class="auth-lang-pills" id="authLangPills">
+              <button type="button" class="auth-lang-pill active" data-lang="en">English</button>
+              <button type="button" class="auth-lang-pill" data-lang="hi">हिन्दी (Hindi)</button>
+              <button type="button" class="auth-lang-pill" data-lang="as">অসমীয়া (Assamese)</button>
+              <button type="button" class="auth-lang-pill" data-lang="bn">বাংলা (Bengali)</button>
+              <button type="button" class="auth-lang-pill" data-lang="brx">बड़ो (Bodo)</button>
+              <button type="button" class="auth-lang-pill" data-lang="mni">মৈতৈলোন্ (Manipuri)</button>
+            </div>
+          </div>
+
+          <!-- Auth Mode Navigation Tabs -->
+          <div class="auth-tabs-row" role="tablist">
+            <button class="auth-tab-btn active" id="tabAuthLogin" role="tab" aria-selected="true">
+              <span>🔑 Sign In</span>
+            </button>
+            <button class="auth-tab-btn" id="tabAuthSignup" role="tab" aria-selected="false">
+              <span>📝 Create Account (Sign Up)</span>
+            </button>
+          </div>
+
+          <!-- PANEL 1: SIGN IN -->
+          <div class="auth-panel" id="panelAuthLogin">
+            <div class="role-selector-pills">
+              <button class="role-pill active" id="pillLoginPatient" data-role="patient">
+                <span>👴 Patient Sign In</span>
+              </button>
+              <button class="role-pill" id="pillLoginDoctor" data-role="doctor">
+                <span>🩺 Doctor Sign In</span>
+              </button>
+            </div>
+
+            <!-- Patient Login Sub-Form -->
+            <div class="login-subform" id="subformPatientLogin">
+              <p class="auth-sub-instructions">Instant demo elder access, or sign in with your account credentials:</p>
+              
+              <div class="one-tap-patient-list" id="oneTapPatientList">
+                <!-- Clean 1-tap demo elder profile dynamically filled -->
+              </div>
+
+              <div class="auth-divider"><span>SIGN IN WITH GMAIL / USERNAME & PASSWORD</span></div>
+
+              <form id="formPatientDirectLogin" class="auth-form" autocomplete="on">
+                <div class="form-group">
+                  <label for="inputPatientIdentifier">Patient / Caregiver Gmail or Username *</label>
+                  <input type="text" id="inputPatientIdentifier" class="auth-input" placeholder="e.g. bhaben.baruah@gmail.com or Bhaben" autocomplete="username" required>
+                </div>
+                <div class="form-group">
+                  <label for="inputPatientPassword">Account Password *</label>
+                  <input type="password" id="inputPatientPassword" class="auth-input" placeholder="Enter your account password (e.g. 1234)" autocomplete="current-password" required>
+                </div>
+                <div class="login-error-text" id="loginPatientError"></div>
+                <button type="submit" class="btn-auth-submit btn-patient-enter">
+                  <span>Enter Cognitive Garden ➔</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- Doctor Login Sub-Form -->
+            <div class="login-subform" id="subformDoctorLogin" style="display:none;">
+              <p class="auth-sub-instructions">Doctor & Neurologist Clinical Access (Demo PIN: <strong>1234</strong>):</p>
+              
+              <form id="formDoctorLogin" class="auth-form" autocomplete="off">
+                <div class="form-group">
+                  <label for="inputDoctorEmail">Doctor Username / Official Gmail</label>
+                  <input type="text" id="inputDoctorEmail" class="auth-input" placeholder="e.g. anamika.deka@sih.gov.in" autocomplete="off" required>
+                </div>
+                <div class="form-group">
+                  <label for="inputDoctorPin">Doctor 4-Digit Security PIN</label>
+                  <input type="password" id="inputDoctorPin" class="auth-input" maxlength="6" placeholder="Enter PIN (e.g. 1234)" autocomplete="off" required>
+                </div>
+                <div class="login-error-text" id="loginDoctorError"></div>
+                <button type="submit" class="btn-auth-submit btn-doctor-enter">
+                  <span>Unlock Doctor Telemetry 🩺 ➔</span>
+                </button>
+              </form>
+
+              <div class="quick-demo-auth-box">
+                <button type="button" class="btn-quick-fill-pin" id="btnDemoDoctorLogin">⚡ Instant 1-Click Doctor Login (Dr. Anamika Deka)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL 2: SIGN UP / REGISTRATION -->
+          <div class="auth-panel" id="panelAuthSignup" style="display:none;">
+            <div class="role-selector-pills">
+              <button class="role-pill active" id="pillSignupPatient" data-role="patient">
+                <span>👴 Register as Patient</span>
+              </button>
+              <button class="role-pill" id="pillSignupDoctor" data-role="doctor">
+                <span>🩺 Register as Doctor</span>
+              </button>
+            </div>
+
+            <!-- Patient Sign Up Form -->
+            <form id="formPatientSignup" class="auth-form signup-form">
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label for="regPatientName">Full Name *</label>
+                  <input type="text" id="regPatientName" class="auth-input" placeholder="e.g. Manomati Gogoi" required>
+                </div>
+                <div class="form-group">
+                  <label for="regPatientAge">Age (Years) *</label>
+                  <input type="number" id="regPatientAge" class="auth-input" placeholder="e.g. 70" min="50" max="110" value="70" required>
+                </div>
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label for="regPatientEmail">Patient / Caregiver Gmail *</label>
+                  <input type="email" id="regPatientEmail" class="auth-input" placeholder="e.g. patient.care@gmail.com" autocomplete="email" required>
+                </div>
+                <div class="form-group">
+                  <label for="regPatientPassword">Create Account Password *</label>
+                  <input type="password" id="regPatientPassword" class="auth-input" placeholder="Enter secure password (e.g. 1234)" autocomplete="new-password" required>
+                </div>
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label for="regPatientLocation">Home State / Town (Optional)</label>
+                  <input type="text" id="regPatientLocation" class="auth-input" placeholder="e.g. Assam, NER" value="Assam, NER">
+                </div>
+                <div class="form-group">
+                  <label for="regCaregiverPhone">Emergency Caregiver Phone (Optional)</label>
+                  <input type="tel" id="regCaregiverPhone" class="auth-input" placeholder="e.g. 9876543210">
+                </div>
+              </div>
+              <div class="login-error-text" id="signupPatientError"></div>
+
+              <div class="form-group">
+                <label>Select Preferred Friendly Avatar</label>
+                <div class="avatar-selection-row">
+                  <label class="avatar-radio-label">
+                    <input type="radio" name="patientAvatar" value="👴" checked>
+                    <span class="avatar-option">👴</span>
+                  </label>
+                  <label class="avatar-radio-label">
+                    <input type="radio" name="patientAvatar" value="👵">
+                    <span class="avatar-option">👵</span>
+                  </label>
+                  <label class="avatar-radio-label">
+                    <input type="radio" name="patientAvatar" value="👨">
+                    <span class="avatar-option">👨</span>
+                  </label>
+                  <label class="avatar-radio-label">
+                    <input type="radio" name="patientAvatar" value="👩">
+                    <span class="avatar-option">👩</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="regCareProtocol">Cognitive Intervention Protocol</label>
+                <select id="regCareProtocol" class="auth-input">
+                  <option value="Memory & Daily Routines">Memory & Daily Routines (Mild Decline)</option>
+                  <option value="Attention & Visual Perception">Attention & Visual Perception</option>
+                  <option value="Executive Function & Sequencing">Executive Function & Sequencing</option>
+                  <option value="General Cognitive Stimulation">General Cognitive Stimulation</option>
+                </select>
+              </div>
+
+              <button type="submit" class="btn-auth-submit btn-patient-enter">
+                <span>Create Patient Account & Enter ➔</span>
+              </button>
+            </form>
+
+            <!-- Doctor Sign Up Form -->
+            <form id="formDoctorSignup" class="auth-form signup-form" style="display:none;">
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label for="regDoctorName">Doctor Full Name *</label>
+                  <input type="text" id="regDoctorName" class="auth-input" placeholder="e.g. Dr. Siddharth Das" required>
+                </div>
+                <div class="form-group">
+                  <label for="regDoctorRegNo">Medical Registration / License No. *</label>
+                  <input type="text" id="regDoctorRegNo" class="auth-input" placeholder="e.g. MCI-2024-8891" required>
+                </div>
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label for="regDoctorSpecialty">Specialization *</label>
+                  <input type="text" id="regDoctorSpecialty" class="auth-input" placeholder="e.g. Cognitive Neurology" value="Cognitive Neurology" required>
+                </div>
+                <div class="form-group">
+                  <label for="regDoctorClinic">Hospital / Health Center Unit *</label>
+                  <input type="text" id="regDoctorClinic" class="auth-input" placeholder="e.g. District Medical Unit, NER" value="District Medical Unit, NER" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="regDoctorEmail">Doctor Official Gmail Address *</label>
+                <input type="email" id="regDoctorEmail" class="auth-input" placeholder="e.g. dr.siddharth@gmail.com" required>
+              </div>
+              <div class="login-error-text" id="signupDoctorError"></div>
+
+              <div class="form-group">
+                <label for="regDoctorPin">Create 4-Digit Security PIN *</label>
+                <input type="password" id="regDoctorPin" class="auth-input" maxlength="4" placeholder="e.g. 1234" value="1234" required>
+              </div>
+
+              <button type="submit" class="btn-auth-submit btn-doctor-enter">
+                <span>Create Doctor Account & Open Telemetry 🩺 ➔</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- VIEW 1: PATIENT DASHBOARD / 12-GAME HUB & SMART CARE HUB -->
+    <section id="viewPatientHub" class="view-section">
+      
+      <!-- Welcome Banner with AI Adaptive Indicator -->
+      <div class="village-welcome-banner">
+        <div class="banner-content">
+          <div class="banner-badge-group">
+            <span class="greeting-badge">Welcome to Your Cognitive Garden</span>
+            <span class="ai-adaptive-badge" id="patientAITierBadge">🤖 AI Adaptive Tier: Level 1 (Gentle Assistance)</span>
+          </div>
+          <h2 class="welcome-heading">Hello, <span id="welcomePatientName">Bhaben Baruah</span>!</h2>
+          <p class="welcome-subtext">Choose any calming activity below. There are no timers, stress, or penalties—just pleasant memories, music, and gentle brain exercises tailored to your comfort.</p>
+        </div>
+        <div class="banner-stats-pill">
+          <span class="pill-icon">🌸</span>
+          <div class="pill-text">
+            <strong id="patientCompletedToday">0</strong>
+            <span>Activities Completed Today</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SMART DAILY CARE & REMINDERS MODULE (Medicines, Hydration, Daily Activities, Appointments) -->
+      <div class="smart-reminders-card" id="patientRemindersHub">
+        <div class="reminders-header">
+          <div class="rem-header-title">
+            <span class="rem-icon-large">⏰</span>
+            <div>
+              <h3 class="section-title" style="margin-bottom:2px;">Smart Daily Living Reminders</h3>
+              <p class="table-subtitle">Assisting memory recall for medications, water intake, daily routines, and doctor visits</p>
+            </div>
+          </div>
+          <button class="btn-rem-speak" id="btnSpeakAllReminders" aria-label="Read Out Daily Reminders">
+            <span>🔊</span>
+            <span>Read My Reminders</span>
+          </button>
+        </div>
+
+        <div class="reminders-grid-4">
+          <!-- Reminder 1: Medicines -->
+          <div class="reminder-item-box" id="remBoxMeds">
+            <div class="rem-item-top">
+              <span class="r-icon">💊</span>
+              <div class="r-info">
+                <span class="r-label">Prescription Medicines</span>
+                <strong class="r-title" id="remMedTitle">Morning Cognitive Booster (09:00 AM)</strong>
+              </div>
+            </div>
+            <p class="r-sub" id="remMedSub">Take 1 tablet with fresh water after breakfast.</p>
+            <button class="btn-rem-action" id="btnTakeMed" data-type="med">
+              <span>✅ Mark Taken</span>
+            </button>
+          </div>
+
+          <!-- Reminder 2: Hydration -->
+          <div class="reminder-item-box" id="remBoxHydration">
+            <div class="rem-item-top">
+              <span class="r-icon">💧</span>
+              <div class="r-info">
+                <span class="r-label">Daily Hydration</span>
+                <strong class="r-title" id="remWaterTitle">Drink Warm Spring Water</strong>
+              </div>
+            </div>
+            <div class="hydration-tracker-row">
+              <span class="water-progress-text">Glasses Logged: <strong id="waterCount">4</strong> / 8</span>
+              <button class="btn-water-add" id="btnAddWater" aria-label="Add 1 Glass of Water">+ 1 Glass</button>
+            </div>
+            <div class="progress-track" style="margin-top:8px;">
+              <div class="progress-fill" id="fillWater" style="width: 50%;"></div>
+            </div>
+          </div>
+
+          <!-- Reminder 3: Daily Activity -->
+          <div class="reminder-item-box" id="remBoxActivity">
+            <div class="rem-item-top">
+              <span class="r-icon">🌿</span>
+              <div class="r-info">
+                <span class="r-label">Daily Routine</span>
+                <strong class="r-title" id="remActTitle">Morning Garden Walk (15 Mins)</strong>
+              </div>
+            </div>
+            <p class="r-sub">Gentle breathing in fresh air to stimulate motor vitality.</p>
+            <button class="btn-rem-action" id="btnCompleteRoutine" data-type="routine">
+              <span>🌸 Done Today</span>
+            </button>
+          </div>
+
+          <!-- Reminder 4: Medical Appointments -->
+          <div class="reminder-item-box" id="remBoxAppt">
+            <div class="rem-item-top">
+              <span class="r-icon">🩺</span>
+              <div class="r-info">
+                <span class="r-label">Clinical Appointment</span>
+                <strong class="r-title" id="remApptTitle">Dr. Anamika Deka (Friday, 10:30 AM)</strong>
+              </div>
+            </div>
+            <p class="r-sub">Monthly cognitive review & telemetry assessment.</p>
+            <button class="btn-rem-action btn-rem-check" id="btnConfirmAppt">
+              <span>📅 Confirmed</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Doctor's Active Message Banner for Patient -->
+      <div class="doctor-notice-card" id="doctorNoticeCard" style="display:none;">
+        <div class="notice-icon-box">🩺</div>
+        <div class="notice-content">
+          <div class="notice-header">
+            <span class="notice-tag">Doctor's Clinical Guidance</span>
+            <span class="notice-author">Dr. Anamika Deka (Cognitive Specialist)</span>
+            <span class="notice-time" id="patientLastMsgTime">Today</span>
+          </div>
+          <p class="notice-text" id="patientDoctorAdviceText">
+            "Hello Bhaben! Please enjoy 10 minutes of gentle memory and tea sequencing games today. Take deep breaths and have fun!"
+          </p>
+          <div class="notice-actions">
+            <button class="btn-notice-action" id="btnSpeakDoctorAdvice">
+              <span>🔊</span>
+              <span>Listen to Doctor</span>
+            </button>
+            <div class="quick-patient-replies">
+              <span class="quick-reply-label">Quick Reply:</span>
+              <button class="btn-quick-reply" data-reply="Thank you Doctor! Feeling good today. 👍">👍 Thank You</button>
+              <button class="btn-quick-reply" data-reply="Enjoyed the memory exercises. 🌸">🌸 Enjoyed Games</button>
+              <button class="btn-quick-reply" data-reply="Please call for routine checkup. 📞">📞 Request Checkup</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Domain Filters / Quick Tabs -->
+      <div class="domain-filter-bar" role="tablist" aria-label="Cognitive Domain Filter">
+        <button class="filter-tab active" data-domain="all" role="tab" aria-selected="true">
+          <span>🌾 All Activities (12)</span>
+        </button>
+        <button class="filter-tab" data-domain="memory" role="tab" aria-selected="false">
+          <span>🧠 Memory Improvement</span>
+        </button>
+        <button class="filter-tab" data-domain="executive" role="tab" aria-selected="false">
+          <span>☕ Daily Routine Recall</span>
+        </button>
+        <button class="filter-tab" data-domain="visuospatial" role="tab" aria-selected="false">
+          <span>🎨 Pattern & Object Recognition</span>
+        </button>
+        <button class="filter-tab" data-domain="attention" role="tab" aria-selected="false">
+          <span>🌿 Attention & Concentration</span>
+        </button>
+        <button class="filter-tab" data-domain="numeracy" role="tab" aria-selected="false">
+          <span>🪙 Functional Numeracy</span>
+        </button>
+      </div>
+
+      <!-- 12-GAME INTERACTIVE HUB GRID -->
+      <div class="games-grid" id="gamesGrid">
+        <!-- Game 1 -->
+        <div class="game-card" data-game-id="reminiscence" data-domain="memory">
+          <div class="card-badge domain-memory">Memory Improvement</div>
+          <div class="card-icon-wrapper">🫖</div>
+          <h3 class="card-title">1. Reminiscence Recall</h3>
+          <p class="card-local-name">Traditional Heritage Memory Match</p>
+          <p class="card-desc">Flip and match cards with classic regional treasures: Tea Kettle, Rhinoceros, Silk Motif, and Orchid Flower.</p>
+          <button class="btn-play-game" data-game="reminiscence" aria-label="Play Reminiscence Recall">
+            <span>Play Activity</span>
+            <span class="arrow-icon">➔</span>
+          </button>
+        </div>
+
+        <!-- Game 2 -->
+        <div class="game-card" data-game-id="tea_sequencer" data-domain="executive">
+          <div class="card-badge domain-executive">Daily Routine Recall</div>
+          <div class="card-icon-wrapper">☕</div>
+          <h3 class="card-title">2. Morning Tea Sequencer</h3>
+          <p class="card-local-name">Daily Routine Procedural Sequencing</p>
+          <p class="card-desc">Put the morning tea preparation steps in order: Boil spring water, add fresh tea leaves, and pour into a clay cup.</p>
+          <button class="btn-play-game" data-game="tea_sequencer" aria-label="Play Morning Tea Sequencer">
+            <span>Play Activity</span>
+            <span class="arrow-icon">➔</span>
+          </button>
+        </div>
+
+        <!-- Game 3 -->
+        <div class="game-card" data-game-id="haat_explorer" data-domain="memory">
+          <div class="card-badge domain-memory">Short-Term Memory</div>
+          <div class="card-icon-wrapper">🧺</div>
+          <h3 class="card-title">3. Weekly Market Explorer</h3>
+          <p class="card-local-name">Haat Bazaar Basket Recall</p>
+          <p class="card-desc">Remember the 3 fresh items shown in the bamboo basket, then find them in the village marketplace stalls.</p>
+          <button class="btn-play-game" data-game="haat_explorer" aria-label="Play Weekly Market Explorer">
+            <span>Play Activity</span>
+            <span class="arrow-icon">➔</span>
+          </button>
+        </div>
+
+        <!-- Game 4 -->
+        <div class="game-card" data-game-id="weaver_shuttle" data-domain="visuospatial">
+          <div class="card-badge domain-visuospatial">Pattern Recognition</div>
+          <div class="card-icon-wrapper">🧵</div>
+          <h3 class="card-title">4. The Weaver’s Shuttle</h3>
+          <p class="card-local-name">Traditional Diamond Motif Tracing</p>
+          <p class="card-desc">Trace along the traditional diamond silk loom motif with your finger or mouse at your own gentle pace.</p>
+          <button class="btn-play-game" data-game="weaver_shuttle" aria-label="Play The Weaver's Shuttle">
+            <span>Play Activity</span>
+            <span class="arrow-icon">➔</span>
+          </button>
+        </div>
+
+        <!-- Game 5 -->
+        <div class="game-card" data-game-id="hill_sounds" data-domain="attention">
+          <div class="card-badge domain-attention">Acoustic Perception</div>
+          <div class="card-icon-wrapper">🎺</div>
+          <h3 class="card-title">5. Sounds of the Hills</h3>
+          <p class="card-local-name">Acoustic & Wildlife Tone Matching</p>
+          <p class="card-desc">Listen to soothing acoustic sounds: Buffalo Horn, Plucked String, Monsoon Rain, and Hornbill Call.</p>
+          <button class="btn-play-game" data-game="hill_sounds" aria-label="Play Sounds of the Hills">
+            <span>Play Activity</span>
+            <span class="arrow-icon">➔</span>
+          </button>
+        </div>
+
+        <!-- Game 6 -->
+        <div class="game-card" data-game-id="folk_rhymes" data-domain="memory">
+          <div class="card-badge domain-memory">Language & Proverbs</div>
+          <div class="card-icon-wrapper">📜</div>
+          <h3 class="card-title">6. Classic Folk Sayings</h3>
+          <p class="card-local-name">Proverb & Wisdom Completion</p>
+          <p class="card-desc">Listen to the opening of classic folk sayings and pick the wise ending that completes the rhyme.</p>
+          <button class="btn-play-game" data-game="folk_rhymes" aria-label="Play Classic Folk Sayings">
+            <span>Play Activity</span>
+            <span class="arrow-icon">➔</span>
+          </button>
+        </div>
+
+        <!-- Game 7 -->
+        <div class="game-card" data-game-id="two_leaves" data-domain="attention">
+          <div class="card-badge domain-attention">Attention & Focus</div>
+          <div class="card-icon-wrapper">🌱</div>
+          <h3 class="card-title">7. Two Leaves and a Bud</h3>
+          <p class="card-local-name">Selective Tea Foliage Attention</p>
+          <p class="card-desc">Gently tap only the fresh, light-green tea shoots on the bush while letting dry twigs rest.</p>
+          <button class="btn-play-game" data-game="two_leaves" aria-label="Play Two Leaves and a Bud">
+            <span>Play Activity</span>
+            <span class="arrow-icon">➔</span>
+          </button>
+        </div>
+
+        <!-- Game 8 -->
+        <div class="game-card" data-game-id="bazaar_counter" data-domain="numeracy">
+          <div class="card-badge domain-numeracy">Functional Numeracy</div>
+          <div class="card-icon-wrapper">🪙</div>
+          <h3 class="card-title">8. Village Market Counter</h3>
+          <p class="card-local-name">Currency Coin Counting</p>
+          <p class="card-desc">Use shiny currency coins (₹1, ₹2, ₹5) to count out the exact price for fresh garden produce.</p>
+          <button class="btn-play-game" data-game="bazaar_counter" aria-label="Play Village Market Counter">
+            <span>Play Activity</span>
+            <span class="arrow-icon">➔</span>
+          </button>
+        </div>
+
+        <!-- Game 9 -->
+        <div class="game-card" data-game-id="pantry_sort" data-domain="executive">
+          <div class="card-badge domain-executive">Categorical Sorting</div>
+          <div class="card-icon-wrapper">🌾</div>
+          <h3 class="card-title">9. Harvest Granary Sort</h3>
+          <p class="card-local-name">Categorical Sorting Exercise</p>
+          <p class="card-desc">Sort items into their rightful granary bins: Edible Garden Harvest vs. Traditional Farming Tools.</p>
+          <button class="btn-play-game" data-game="pantry_sort" aria-label="Play Harvest Granary Sort">
+            <span>Play Activity</span>
+            <span class="arrow-icon">➔</span>
+          </button>
+        </div>
+
+        <!-- Game 10 -->
+        <div class="game-card" data-game-id="path_home" data-domain="visuospatial">
+          <div class="card-badge domain-visuospatial">Spatial Navigation</div>
+          <div class="card-icon-wrapper">🌉</div>
+          <h3 class="card-title">10. The Path Home</h3>
+          <p class="card-local-name">Spatial Landmark Navigation</p>
+          <p class="card-desc">Follow familiar landmark directions across the bamboo bridge and paddy field to reach home.</p>
+          <button class="btn-play-game" data-game="path_home" aria-label="Play The Path Home">
+            <span>Play Activity</span>
+            <span class="arrow-icon">➔</span>
+          </button>
+        </div>
+
+        <!-- Game 11 -->
+        <div class="game-card" data-game-id="kinship_faces" data-domain="memory">
+          <div class="card-badge domain-memory">Facial Recognition</div>
+          <div class="card-icon-wrapper">👨‍👩‍👧</div>
+          <h3 class="card-title">11. Kinship & Faces</h3>
+          <p class="card-local-name">Family & Facial Recall</p>
+          <p class="card-desc">Recognize beloved family members dressed in traditional attire such as the red woven scarf.</p>
+          <button class="btn-play-game" data-game="kinship_faces" aria-label="Play Kinship and Faces">
+            <span>Play Activity</span>
+            <span class="arrow-icon">➔</span>
+          </button>
+        </div>
+
+        <!-- Game 12 -->
+        <div class="game-card" data-game-id="natural_dye" data-domain="attention">
+          <div class="card-badge domain-attention">Color Discrimination</div>
+          <div class="card-icon-wrapper">🧶</div>
+          <h3 class="card-title">12. Natural Dye Shade Matching</h3>
+          <p class="card-local-name">Silk Skein Color Discrimination</p>
+          <p class="card-desc">Match subtle silk and cotton yarn colors dyed with forest herbs, turmeric, and wild indigo.</p>
+          <button class="btn-play-game" data-game="natural_dye" aria-label="Play Natural Dye Shade Matching">
+            <span>Play Activity</span>
+            <span class="arrow-icon">➔</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: ACTIVE GAME INTERACTIVE PLAYGROUND -->
+    <section id="viewGamePlayer" class="view-section">
+      <div class="game-player-wrapper">
+        <!-- Game Top Nav -->
+        <div class="game-player-header">
+          <button class="btn-back-hub" id="btnBackToHub" aria-label="Return to Village Activities">
+            <span class="back-icon">⬅️</span>
+            <span>Back to Activities</span>
+          </button>
+
+          <div class="game-meta-badge">
+            <span class="game-icon-large" id="activeGameIcon">🫖</span>
+            <div>
+              <h2 class="active-game-title" id="activeGameTitle">Reminiscence Recall</h2>
+              <p class="active-game-sub" id="activeGameLocal">Traditional Heritage Memory Match</p>
+            </div>
+          </div>
+
+          <div class="game-header-actions">
+            <span class="ai-difficulty-pill" id="activeGameDifficultyPill">AI Difficulty: Adaptive</span>
+            <button class="btn-voice-prompt" id="btnSpeakGamePrompt" aria-label="Listen to Voice Instructions">
+              <span>🔊</span>
+              <span>Listen</span>
+            </button>
+            <button class="btn-gentle-hint" id="btnGentleHint" aria-label="Get a gentle encouraging hint">
+              <span>💡</span>
+              <span>Gentle Hint</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Verbal Instruction Banner -->
+        <div class="instruction-banner" id="instructionBanner">
+          <div class="instruction-bubble">
+            <span class="bubble-icon">🗣️</span>
+            <p id="instructionText" class="instruction-text">Tap on any two cards to turn them over. Match the matching pairs!</p>
+          </div>
+        </div>
+
+        <!-- Dynamic Game Surface Container -->
+        <div class="game-surface" id="gameSurface">
+          <!-- Game content dynamically loaded here -->
+        </div>
+
+        <!-- Soft Feedback / Encouragement Footnote -->
+        <div class="game-footnote">
+          <span class="footnote-leaf">🌿</span>
+          <span id="encouragementText">Take all the time you need. Every step keeps your memory bright and active.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: DOCTOR CLINICAL DASHBOARD & PATIENT MESSAGING SYSTEM -->
+    <section id="viewCaregiverDashboard" class="view-section">
+      <div class="caregiver-dashboard-wrapper">
+        
+        <!-- Doctor Clinical Header -->
+        <div class="clinical-header-card">
+          <div class="clinical-header-text">
+            <span class="clinical-tag">Doctor & Neurologist Clinical Module · SIH26003</span>
+            <h2 class="clinical-title">Patient Cognitive Telemetry & Clinical Reminders</h2>
+            <p class="clinical-sub">Monitor Real-Time Patient Activity, MoCA Scoring, Automated Alerts & Direct Prescriptions</p>
+          </div>
+          <div class="clinical-header-actions">
+            <button class="btn-export btn-sync-cloud" id="btnSyncEdgeCloud">
+              <span>🔄</span>
+              <span>Sync Offline Queue</span>
+            </button>
+            <button class="btn-export btn-csv" id="btnExportCSV">
+              <span>📊</span>
+              <span>Export CSV</span>
+            </button>
+            <button class="btn-export btn-json" id="btnExportJSON">
+              <span>📁</span>
+              <span>Export JSON</span>
+            </button>
+            <button class="btn-export btn-reset-data" id="btnResetTelemetry">
+              <span>🗑️</span>
+              <span>Reset Data</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Clinical Alert Center (Alerts for Doctor) -->
+        <div class="clinical-alert-bar" id="clinicalAlertBar">
+          <div class="alert-icon-wrap">🚨</div>
+          <div class="alert-content">
+            <strong id="alertMainTitle">Active Clinical Alert: High Hesitation Detected</strong>
+            <p id="alertMainDesc">Patient Bhaben Baruah recorded latency spike on Haat Explorer (>8.2s). Suggest reviewing memory training tier.</p>
+          </div>
+          <button class="btn-alert-dismiss" id="btnDismissAlert">Dismiss Alert</button>
+        </div>
+
+        <!-- Doctor Patient Selector Tabs -->
+        <div class="doctor-patient-selector-card">
+          <div class="selector-header">
+            <span class="selector-label">Select Patient to Inspect & Message:</span>
+          </div>
+          <div class="patient-selector-tabs" id="doctorPatientTabsContainer">
+            <!-- Dynamically populated patient tabs -->
+          </div>
+        </div>
+
+        <!-- Active Patient Clinical Overview Card -->
+        <div class="patient-clinical-card">
+          <div class="patient-avatar-large" id="dashPatientAvatar">👴</div>
+          <div class="patient-clinical-info">
+            <h3 id="dashPatientName">Bhaben Baruah</h3>
+            <p><strong id="dashPatientMeta">Age: 72 Years · Location: Jorhat, Assam · Care Protocol: Memory Stimulation</strong></p>
+            <p class="patient-notes" id="dashPatientNotes">Clinical Notes: Responds well to audio cues and tea routine sequences. High compliance observed with 64px hit targets.</p>
+          </div>
+          <div class="moca-badge-box">
+            <span class="moca-label">Estimated MoCA Proxy</span>
+            <span class="moca-score" id="dashMoCAScore">26 / 30</span>
+            <span class="moca-status" id="dashMoCAStatus">Mild / Stable Function</span>
+          </div>
+        </div>
+
+        <!-- 4 Real-time KPI Metric Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon-box">📊</div>
+            <div class="kpi-content">
+              <span class="kpi-label">Patient Cognitive Accuracy</span>
+              <span class="kpi-val" id="dashAvgAccuracy">0%</span>
+              <span class="kpi-sub">Precision across patient exercises</span>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon-box">🏆</div>
+            <div class="kpi-content">
+              <span class="kpi-label">Completed Exercises</span>
+              <span class="kpi-val" id="dashTotalCompleted">0</span>
+              <span class="kpi-sub">Across 12 clinical cognitive domains</span>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon-box">⚡</div>
+            <div class="kpi-content">
+              <span class="kpi-label">Avg. Response Latency</span>
+              <span class="kpi-val" id="dashAvgLatency">0.0 s</span>
+              <span class="kpi-sub" id="dashLatencyStatus">Optimal reaction time</span>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon-box">🛡️</div>
+            <div class="kpi-content">
+              <span class="kpi-label">Hesitation Flags</span>
+              <span class="kpi-val" id="dashHesitationFlags">0</span>
+              <span class="kpi-sub" id="dashFlagStatus">0 High Hesitation episodes</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- DOCTOR PATIENT REMINDER SETTINGS & PRESCRIPTIONS (Removed from Doctor View) -->
+        <div class="doctor-reminders-control-card" style="display: none !important;">
+          <div class="msg-card-header">
+            <div class="msg-card-title-wrap">
+              <span class="msg-header-icon">⏰</span>
+              <div>
+                <h4 class="section-title" style="margin-bottom:2px;">Patient Daily Schedule & Medical Reminders</h4>
+                <p class="table-subtitle">Configure medication timings, daily hydration target, and next appointment date for <strong id="remDoctorPatientName">Bhaben Baruah</strong></p>
+              </div>
+            </div>
+            <button class="btn-primary-nav" id="btnSaveDoctorReminders" style="min-height:48px;padding:0 18px;">💾 Save Schedule</button>
+          </div>
+
+          <div class="reminders-settings-grid">
+            <div class="form-group">
+              <label for="inputDocMedName">Medication Prescription & Time</label>
+              <input type="text" id="inputDocMedName" class="auth-input" value="Donepezil (5mg) at 09:00 AM after breakfast">
+            </div>
+            <div class="form-group">
+              <label for="inputDocWaterTarget">Daily Hydration Target</label>
+              <input type="number" id="inputDocWaterTarget" class="auth-input" value="8" min="4" max="12">
+            </div>
+            <div class="form-group">
+              <label for="inputDocNextAppt">Next Clinical Checkup</label>
+              <input type="text" id="inputDocNextAppt" class="auth-input" value="Friday, 10:30 AM (District Cognitive PHC)">
+            </div>
+          </div>
+        </div>
+
+        <!-- DOCTOR-PATIENT INTERACTIVE MESSAGING BOX (Removed from Doctor View) -->
+        <div class="doctor-messaging-card" style="display: none !important;">
+          <div class="msg-card-header">
+            <div class="msg-card-title-wrap">
+              <span class="msg-header-icon">💬</span>
+              <div>
+                <h4 class="section-title" style="margin-bottom:2px;">Doctor-Patient Message & Prescription Box</h4>
+                <p class="table-subtitle">Send personalized clinical advice, words of encouragement, or routine instructions to <strong id="msgTargetPatientName">Bhaben Baruah</strong></p>
+              </div>
+            </div>
+            <span class="doctor-badge-pill" id="doctorOnlineBadge">Dr. Anamika Deka (Online)</span>
+          </div>
+
+          <!-- Message History Container -->
+          <div class="msg-history-container" id="msgHistoryContainer">
+            <!-- Messages dynamically rendered here -->
+          </div>
+
+          <!-- Message Composer Area -->
+          <div class="msg-composer-area">
+            <div class="quick-doctor-presets">
+              <span class="preset-label">Quick Suggestions:</span>
+              <button class="btn-preset-msg" data-msg="Excellent focus on your memory exercises today! Keep up the wonderful work.">🌟 Great Memory Focus</button>
+              <button class="btn-preset-msg" data-msg="Please practice the Morning Tea Sequencer and Market Explorer twice today.">☕ Routine Practice</button>
+              <button class="btn-preset-msg" data-msg="Take a gentle 15-minute rest and stay hydrated with fresh water.">💧 Rest & Hydration</button>
+              <button class="btn-preset-msg" data-msg="Your visuospatial motor tracing is showing great steady improvement!">🎨 Steady Tracing</button>
+            </div>
+
+            <div class="msg-input-row">
+              <textarea id="doctorMsgInput" class="doctor-textarea" placeholder="Type clinical advice or encouragement for this patient..." rows="3"></textarea>
+              <button class="btn-send-msg" id="btnSendDoctorMsg">
+                <span>✉️ Send Note</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cognitive Domain Breakdown -->
+        <div class="domain-breakdown-card">
+          <h4 class="section-title">Cognitive Domain Performance Index</h4>
+          <div class="domain-bars-grid">
+            <div class="domain-bar-item">
+              <div class="domain-bar-header">
+                <span>Memory Improvement (Recall, Market, Kinship)</span>
+                <span id="domainScoreMemory">88%</span>
+              </div>
+              <div class="progress-track"><div class="progress-fill" id="fillMemory" style="width: 88%;"></div></div>
+            </div>
+            <div class="domain-bar-item">
+              <div class="domain-bar-header">
+                <span>Daily Routine Recall & Executive Function</span>
+                <span id="domainScoreExec">85%</span>
+              </div>
+              <div class="progress-track"><div class="progress-fill" id="fillExec" style="width: 85%;"></div></div>
+            </div>
+            <div class="domain-bar-item">
+              <div class="domain-bar-header">
+                <span>Pattern & Object Recognition (Loom Motif Tracing)</span>
+                <span id="domainScoreVisuo">92%</span>
+              </div>
+              <div class="progress-track"><div class="progress-fill" id="fillVisuo" style="width: 92%;"></div></div>
+            </div>
+            <div class="domain-bar-item">
+              <div class="domain-bar-header">
+                <span>Attention & Concentration (Tea Shoots, Sounds, Dye)</span>
+                <span id="domainScoreAttn">90%</span>
+              </div>
+              <div class="progress-track"><div class="progress-fill" id="fillAttn" style="width: 90%;"></div></div>
+            </div>
+            <div class="domain-bar-item">
+              <div class="domain-bar-header">
+                <span>Functional Numeracy (Market Coin Counter)</span>
+                <span id="domainScoreNum">86%</span>
+              </div>
+              <div class="progress-track"><div class="progress-fill" id="fillNum" style="width: 86%;"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Longitudinal Telemetry Data Table -->
+        <div class="telemetry-table-card">
+          <div class="table-header-row">
+            <div>
+              <h4 class="section-title">Patient Interaction Telemetry Stream</h4>
+              <p class="table-subtitle">Granular logs captured per cognitive session interaction with clinical latency flags</p>
+            </div>
+            <div class="table-stats-badge" id="telemetryRowCount">0 logs captured</div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="telemetry-table" id="telemetryTable">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Patient Name</th>
+                  <th>Exercise Name</th>
+                  <th>Latency</th>
+                  <th>Accuracy / Score</th>
+                  <th>Cognitive Domain</th>
+                  <th>Clinical Flag</th>
+                </tr>
+              </thead>
+              <tbody id="telemetryTableBody">
+                <!-- Log rows dynamically injected -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="empty-table-state" id="emptyTelemetryState">
+            <span>📋</span>
+            <p>No telemetry recorded yet for this session. Have the patient complete an activity to generate real-time clinical logs!</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- MODAL: DOCTOR PIN AUTHENTICATION -->
+  <div class="modal-backdrop" id="modalPinAuth" role="dialog" aria-modal="true" aria-labelledby="pinModalTitle">
+    <div class="modal-card pin-modal-card">
+      <div class="modal-header">
+        <h2 id="pinModalTitle" class="modal-title">Doctor Access PIN</h2>
+        <button class="btn-close-modal" id="btnClosePinModal" aria-label="Close PIN Modal">&times;</button>
+      </div>
+      <p class="modal-sub">Please enter your 4-digit Doctor PIN (Default: <strong>1234</strong>) to access patient clinical telemetry and messaging.</p>
+
+      <div class="pin-display-container">
+        <div class="pin-dots-row">
+          <span class="pin-dot" id="dot0"></span>
+          <span class="pin-dot" id="dot1"></span>
+          <span class="pin-dot" id="dot2"></span>
+          <span class="pin-dot" id="dot3"></span>
+        </div>
+        <input type="password" id="pinInputHidden" maxlength="4" autocomplete="off" class="pin-hidden-input" aria-label="PIN Entry Input">
+        <p class="pin-error-msg" id="pinErrorMsg" role="alert"></p>
+      </div>
+
+      <!-- Accessible Large Numeric Keypad -->
+      <div class="pin-keypad">
+        <button class="key-btn" data-key="1">1</button>
+        <button class="key-btn" data-key="2">2</button>
+        <button class="key-btn" data-key="3">3</button>
+        <button class="key-btn" data-key="4">4</button>
+        <button class="key-btn" data-key="5">5</button>
+        <button class="key-btn" data-key="6">6</button>
+        <button class="key-btn" data-key="7">7</button>
+        <button class="key-btn" data-key="8">8</button>
+        <button class="key-btn" data-key="9">9</button>
+        <button class="key-btn key-clear" id="btnPinClear">Clear</button>
+        <button class="key-btn" data-key="0">0</button>
+        <button class="key-btn key-enter" id="btnPinSubmit">➔ OK</button>
+      </div>
+
+      <div class="quick-pin-helper">
+        <button class="btn-quick-fill-pin" id="btnQuickFillPin">⚡ Quick Fill Doctor PIN (1234)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CELEBRATION / GENTLE SUCCESS MODAL -->
+  <div class="modal-backdrop" id="modalCelebration" role="dialog" aria-modal="true">
+    <div class="modal-card celebration-card">
+      <div class="celebration-flower">🌸 ✨ 🌸</div>
+      <h2 class="celebration-title" id="celebTitle">Wonderful Job!</h2>
+      <p class="celebration-sub" id="celebSub">You completed this calming activity with great focus and joy.</p>
+
+      <div class="celeb-stats-row">
+        <div class="celeb-stat">
+          <span class="c-val" id="celebScore">100%</span>
+          <span class="c-lbl">Activity Score</span>
+        </div>
+        <div class="celeb-stat">
+          <span class="c-val" id="celebTime">12s</span>
+          <span class="c-lbl">Duration</span>
+        </div>
+        <div class="celeb-stat">
+          <span class="c-val" id="celebAILevel">Tier 1</span>
+          <span class="c-lbl">AI Assistance</span>
+        </div>
+      </div>
+
+      <div class="celeb-actions">
+        <button class="btn-celeb btn-replay" id="btnCelebReplay">
+          <span>🔄</span>
+          <span>Play Again</span>
+        </button>
+        <button class="btn-celeb btn-hub" id="btnCelebHub">
+          <span>🌾</span>
+          <span>Back to Activities</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ELDERLY VOICE ASSISTANT (MULTILINGUAL VOICE COMMANDS) -->
+  <div class="modal-backdrop" id="modalVoiceAssistant" role="dialog" aria-modal="true" aria-labelledby="voiceAssistantTitle">
+    <div class="modal-card voice-assistant-card">
+      <div class="modal-header">
+        <div class="va-title-wrap">
+          <span class="va-icon">🎙️</span>
+          <div>
+            <h2 id="voiceAssistantTitle" class="modal-title" data-i18n="va_title">Spoken Voice Assistant</h2>
+            <p class="modal-sub" data-i18n="va_sub">Speak naturally in your preferred language or tap a quick command.</p>
+          </div>
+        </div>
+        <button class="btn-close-modal" id="btnCloseVoiceAssistant" aria-label="Close Voice Assistant">&times;</button>
+      </div>
+
+      <!-- Microphone Visual Pulse Circle -->
+      <div class="va-mic-area">
+        <button class="va-big-mic-btn" id="btnVaMicToggle" aria-label="Start Listening">
+          <span class="va-mic-icon" id="vaMicIcon">🎙️</span>
+          <span class="va-pulse-ring"></span>
+        </button>
+        <p class="va-listening-status" id="vaStatusText" data-i18n="va_tap_to_speak">Tap microphone to speak</p>
+        
+        <div class="va-transcript-bubble" id="vaTranscriptBox" style="display:none;">
+          <span class="va-transcript-label">You said:</span>
+          <p class="va-transcript-text" id="vaTranscriptText">"..."</p>
+        </div>
+        <div class="va-response-bubble" id="vaResponseBox" style="display:none;">
+          <span class="va-response-label">Smriti Assistant:</span>
+          <p class="va-response-text" id="vaResponseText">"..."</p>
+        </div>
+      </div>
+
+      <!-- Quick One-Tap Spoken Voice Commands for Elderly (English & Hindi) -->
+      <div class="va-quick-commands">
+        <h4 class="va-quick-title" data-i18n="va_quick_title">Or Tap Instant Spoken Action:</h4>
+        <div class="va-quick-chips">
+          <button class="va-chip" data-cmd="play_game">
+            <span class="chip-icon">🎮</span>
+            <div class="chip-text">
+              <strong data-i18n="cmd_play">Play Cognitive Game</strong>
+              <small>"खेल शुरू करो"</small>
+            </div>
+          </button>
+          <button class="va-chip" data-cmd="meds">
+            <span class="chip-icon">💊</span>
+            <div class="chip-text">
+              <strong data-i18n="cmd_meds">Take Medication</strong>
+              <small>"दवा ले ली"</small>
+            </div>
+          </button>
+          <button class="va-chip" data-cmd="water">
+            <span class="chip-icon">💧</span>
+            <div class="chip-text">
+              <strong data-i18n="cmd_water">Drink 1 Glass Water</strong>
+              <small>"पानी पिया"</small>
+            </div>
+          </button>
+          <button class="va-chip" data-cmd="doctor">
+            <span class="chip-icon">🩺</span>
+            <div class="chip-text">
+              <strong data-i18n="cmd_doctor">Listen to Doctor Note</strong>
+              <small>"डॉक्टर की सलाह"</small>
+            </div>
+          </button>
+          <button class="va-chip" data-cmd="music">
+            <span class="chip-icon">🎵</span>
+            <div class="chip-text">
+              <strong data-i18n="cmd_bihu">Calming Bihu Rhythm</strong>
+              <small>"शांत संगीत"</small>
+            </div>
+          </button>
+          <button class="va-chip" data-cmd="help">
+            <span class="chip-icon">💡</span>
+            <div class="chip-text">
+              <strong data-i18n="cmd_help">Elderly Help & Guide</strong>
+              <small>"मदद चाहिए"</small>
+            </div>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Accessible Live Announcer for Screen Readers -->
+  <div id="srAnnouncer" class="sr-only" aria-live="polite"></div>
+
+  <script src="app.js?v=5"></script>
+</body>
+</html>

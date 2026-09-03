@@ -298,9 +298,14 @@
                   <input type="text" id="regPatientLocation" class="auth-input" placeholder="e.g. Assam, NER" value="Assam, NER">
                 </div>
                 <div class="form-group">
-                  <label for="regCaregiverPhone">Emergency Caregiver Phone (Optional)</label>
-                  <input type="tel" id="regCaregiverPhone" class="auth-input" placeholder="e.g. 9876543210">
+                  <label for="regCaregiverName">Emergency Caretaker Name / Relation</label>
+                  <input type="text" id="regCaregiverName" class="auth-input" placeholder="e.g. Rupankar Baruah (Son)" value="Rupankar Baruah (Son)">
                 </div>
+              </div>
+              <div class="form-group" style="margin-bottom: 16px;">
+                <label for="regCaregiverPhone">Emergency Caregiver Mobile Phone (for Instant SOS) *</label>
+                <input type="tel" id="regCaregiverPhone" class="auth-input" placeholder="e.g. +91 98640 55443" value="+91 98640 55443" required>
+                <small style="color: var(--text-muted); font-size: 0.85rem;">Used to send instant WhatsApp & SMS emergency notifications if assistance is needed.</small>
               </div>
               <div class="login-error-text" id="signupPatientError"></div>
 
@@ -512,6 +517,31 @@
               <button class="btn-quick-reply" data-reply="Enjoyed the memory exercises. 🌸">🌸 Enjoyed Games</button>
               <button class="btn-quick-reply" data-reply="Please call for routine checkup. 📞">📞 Request Checkup</button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMERGENCY CARETAKER ASSISTANCE (SOS) MODULE -->
+      <div class="emergency-sos-card" id="patientEmergencyCard">
+        <div class="sos-card-content">
+          <div class="sos-icon-pulse" aria-hidden="true">🚨</div>
+          <div class="sos-text-block">
+            <div class="sos-title-row">
+              <h3 class="sos-title">Emergency Caretaker Assistance (SOS)</h3>
+              <span class="sos-status-badge">🟢 1-Tap Active</span>
+            </div>
+            <p class="sos-desc">
+              Need immediate help or feeling unwell? Tap the button to instantly alert your family caretaker (<strong id="patientCaretakerNameDisplay">Rupankar Baruah (Son)</strong>: <span id="patientCaretakerPhoneDisplay">+91 98640 55443</span>) via real WhatsApp & SMS with your location.
+            </p>
+          </div>
+          <div class="sos-action-block">
+            <button class="btn-sos-trigger" id="btnTriggerSOS" aria-label="Send Emergency SOS Alert to Caretaker">
+              <span class="sos-btn-icon">🚨</span>
+              <span class="sos-btn-text">
+                <strong>ALERT CARETAKER NOW</strong>
+                <small>Instant WhatsApp & SMS Dispatch</small>
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -789,6 +819,27 @@
             <p id="alertMainDesc">Patient Bhaben Baruah recorded latency spike on Haat Explorer (>8.2s). Suggest reviewing memory training tier.</p>
           </div>
           <button class="btn-alert-dismiss" id="btnDismissAlert">Dismiss Alert</button>
+        </div>
+
+        <!-- REAL-TIME DOCTOR EMERGENCY ALERT BANNER -->
+        <div class="doctor-emergency-banner" id="doctorEmergencyBanner" style="display:none;">
+          <div class="doc-alert-icon-wrap">
+            <span class="doc-alert-icon">🚨</span>
+          </div>
+          <div class="doc-alert-content">
+            <div class="doc-alert-header">
+              <strong class="doc-alert-title">URGENT: PATIENT EMERGENCY SOS TRIGGERED!</strong>
+              <span class="doc-alert-time" id="docAlertTime">Just now</span>
+            </div>
+            <p class="doc-alert-msg" id="docAlertMsg">
+              Patient <strong id="docAlertPatientName">Bhaben Baruah</strong> requires assistance! Caregiver: <span id="docAlertCaretaker">Rupankar Baruah (+91 98640 55443)</span>.
+            </p>
+          </div>
+          <div class="doc-alert-btns">
+            <a href="#" id="btnDocCallCaretaker" class="btn-doc-emergency-action btn-doc-call">📞 Call Caregiver</a>
+            <a href="#" id="btnDocWaCaretaker" class="btn-doc-emergency-action btn-doc-wa" target="_blank" rel="noopener noreferrer">💬 WhatsApp</a>
+            <button class="btn-doc-ack" id="btnDocAckAlert">✅ Mark Attended</button>
+          </div>
         </div>
 
         <!-- Doctor Patient Selector Tabs -->
@@ -1162,6 +1213,78 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- MODAL: EMERGENCY SOS CARETAKER DISPATCH -->
+  <div class="modal-backdrop" id="modalEmergencySOS" role="dialog" aria-modal="true" aria-labelledby="sosModalTitle">
+    <div class="modal-card emergency-modal-card">
+      <div class="emergency-modal-header">
+        <div class="emergency-modal-icon-wrap">
+          <span class="emergency-siren">🚨</span>
+        </div>
+        <div class="emergency-modal-title-box">
+          <h2 id="sosModalTitle" class="emergency-modal-title">Emergency Alert Dispatched!</h2>
+          <p class="emergency-modal-subtitle">Direct distress notification has been routed to your registered family caretaker.</p>
+        </div>
+        <button class="btn-close-modal" id="btnCloseEmergencyModal" aria-label="Close Emergency Modal">&times;</button>
+      </div>
+
+      <div class="emergency-modal-body">
+        <div class="emergency-recipient-card">
+          <div class="recipient-row">
+            <span class="recipient-label">📲 Family Caretaker:</span>
+            <strong class="recipient-name" id="sosModalCaretakerName">Rupankar Baruah (Son)</strong>
+          </div>
+          <div class="recipient-row">
+            <span class="recipient-label">📞 Mobile Number:</span>
+            <strong class="recipient-phone" id="sosModalCaretakerPhone">+91 98640 55443</strong>
+          </div>
+          <div class="recipient-row">
+            <span class="recipient-label">🛡️ Clinical EMR Status:</span>
+            <span class="recipient-status-live">✅ Logged in Central Emergency Health Record</span>
+          </div>
+        </div>
+
+        <div class="emergency-msg-preview-card">
+          <span class="msg-preview-label">Generated Urgent Distress Message:</span>
+          <p class="msg-preview-content" id="sosModalMessagePreview">
+            "🚨 SMRITI URGENT HEALTH ALERT: Patient needs assistance! Location: Assam. Please attend immediately."
+          </p>
+        </div>
+
+        <div class="emergency-action-grid">
+          <a href="#" id="sosModalWhatsappBtn" target="_blank" rel="noopener noreferrer" class="btn-emergency-act btn-emergency-wa">
+            <span class="em-act-icon">💬</span>
+            <div class="em-act-text">
+              <strong>Open WhatsApp Message</strong>
+              <small>Send pre-filled distress alert to Caretaker</small>
+            </div>
+          </a>
+
+          <a href="#" id="sosModalSmsBtn" class="btn-emergency-act btn-emergency-sms">
+            <span class="em-act-icon">📱</span>
+            <div class="em-act-text">
+              <strong>Send Phone SMS</strong>
+              <small>Open device SMS app with pre-filled text</small>
+            </div>
+          </a>
+
+          <a href="#" id="sosModalCallBtn" class="btn-emergency-act btn-emergency-call">
+            <span class="em-act-icon">📞</span>
+            <div class="em-act-text">
+              <strong>Direct Phone Call</strong>
+              <small>Dial Caretaker mobile instantly</small>
+            </div>
+          </a>
+        </div>
+
+        <div class="emergency-modal-footer">
+          <button class="btn-emergency-dismiss" id="btnDismissSosModal">
+            <span>✅ I Am Okay / Close Notice</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 

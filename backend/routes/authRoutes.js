@@ -125,7 +125,10 @@ function isValidGmail(email) {
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { role, name, phone, email, pin, age, location, avatar, protocol, specialty, reg_no, clinic } = req.body;
+    const {
+      role, name, phone, email, pin, age, location, avatar, protocol,
+      specialty, reg_no, clinic, caretaker_name, caretaker_phone, caregiver_phone
+    } = req.body;
 
     if (!role || !name) {
       return res.status(400).json({ error: 'Role and Full Name are required.' });
@@ -175,10 +178,12 @@ router.post('/register', async (req, res) => {
       }
 
       const userPassword = (req.body.password || req.body.pin || '').toString().trim();
+      const ctPhone = (caretaker_phone || caregiver_phone || phone || '').toString().trim();
+      const ctName = (caretaker_name || 'Family Caregiver').toString().trim();
 
       await db.runAsync(`
-        INSERT INTO users (id, role, name, email, phone, pin, age, location, avatar, protocol)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO users (id, role, name, email, phone, pin, age, location, avatar, protocol, caretaker_name, caretaker_phone)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `, [
         id,
         'patient',
@@ -189,7 +194,9 @@ router.post('/register', async (req, res) => {
         age ? parseInt(age, 10) : 70,
         location ? location.trim() : 'Assam, NER',
         avatar || '👴',
-        protocol ? protocol.trim() : 'Reminiscence & Mild Memory Stimulation'
+        protocol ? protocol.trim() : 'Reminiscence & Mild Memory Stimulation',
+        ctName,
+        ctPhone || '+91 98640 55443'
       ]);
 
       // Seed default smart reminders for newly registered patient

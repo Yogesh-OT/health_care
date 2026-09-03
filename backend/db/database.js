@@ -53,6 +53,8 @@ async function initDatabase() {
       location TEXT,
       avatar TEXT,
       protocol TEXT,
+      caretaker_name TEXT,
+      caretaker_phone TEXT,
       specialty TEXT,
       reg_no TEXT,
       clinic TEXT,
@@ -136,6 +138,22 @@ async function initDatabase() {
     )
   `);
 
+  // 7. Emergency Alerts Table (SOS Alerts to Caretaker & Doctor)
+  await db.runAsync(`
+    CREATE TABLE IF NOT EXISTS emergency_alerts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      patient_id TEXT NOT NULL,
+      patient_name TEXT NOT NULL,
+      caretaker_name TEXT,
+      caretaker_phone TEXT NOT NULL,
+      alert_type TEXT DEFAULT 'EMERGENCY_SOS',
+      message TEXT NOT NULL,
+      status TEXT DEFAULT 'DISPATCHED',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(patient_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `);
+
   // Seed default users if empty
   const userCount = await db.getAsync('SELECT COUNT(*) as count FROM users');
   if (userCount.count === 0) {
@@ -143,15 +161,15 @@ async function initDatabase() {
 
     // Patient 1
     await db.runAsync(`
-      INSERT INTO users (id, role, name, email, phone, pin, age, location, avatar, protocol)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, ['p1', 'patient', 'Bhaben Baruah', 'bhaben.baruah@gmail.com', '+91 98640 11223', '1234', 72, 'Guwahati, Kamrup', '👴', 'Reminiscence & Mild Memory Stimulation']);
+      INSERT INTO users (id, role, name, email, phone, pin, age, location, avatar, protocol, caretaker_name, caretaker_phone)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, ['p1', 'patient', 'Bhaben Baruah', 'bhaben.baruah@gmail.com', '+91 98640 11223', '1234', 72, 'Guwahati, Kamrup', '👴', 'Reminiscence & Mild Memory Stimulation', 'Rupankar Baruah (Son)', '+91 98640 55443']);
 
     // Patient 2
     await db.runAsync(`
-      INSERT INTO users (id, role, name, email, phone, pin, age, location, avatar, protocol)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, ['p2', 'patient', 'Hemaprabha Devi', 'hemaprabha.devi@gmail.com', '+91 94350 44556', '1234', 68, 'Tezpur, Sonitpur', '👵', 'Daily Procedural Routine & Music Focus']);
+      INSERT INTO users (id, role, name, email, phone, pin, age, location, avatar, protocol, caretaker_name, caretaker_phone)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, ['p2', 'patient', 'Hemaprabha Devi', 'hemaprabha.devi@gmail.com', '+91 94350 44556', '1234', 68, 'Tezpur, Sonitpur', '👵', 'Daily Procedural Routine & Music Focus', 'Debajit Devi (Grandson)', '+91 94350 77889']);
 
     // Doctor 1
     await db.runAsync(`
@@ -221,18 +239,30 @@ async function initDatabase() {
     console.log('[DB] Database successfully initialized and seeded!');
   }
 
-  // Ensure existing p1 and p2 have default email and pin set
+  // Ensure table migration for existing database file
+  try {
+    await db.runAsync('ALTER TABLE users ADD COLUMN caretaker_name TEXT');
+  } catch (e) {}
+  try {
+    await db.runAsync('ALTER TABLE users ADD COLUMN caretaker_phone TEXT');
+  } catch (e) {}
+
+  // Ensure existing p1 and p2 have default email, pin and caretaker info set
   try {
     await db.runAsync(`
       UPDATE users SET 
         email = COALESCE(email, 'bhaben.baruah@gmail.com'),
-        pin = COALESCE(pin, '1234')
+        pin = COALESCE(pin, '1234'),
+        caretaker_name = COALESCE(caretaker_name, 'Rupankar Baruah (Son)'),
+        caretaker_phone = COALESCE(caretaker_phone, '+91 98640 55443')
       WHERE id = 'p1'
     `);
     await db.runAsync(`
       UPDATE users SET 
         email = COALESCE(email, 'hemaprabha.devi@gmail.com'),
-        pin = COALESCE(pin, '1234')
+        pin = COALESCE(pin, '1234'),
+        caretaker_name = COALESCE(caretaker_name, 'Debajit Devi (Grandson)'),
+        caretaker_phone = COALESCE(caretaker_phone, '+91 94350 77889')
       WHERE id = 'p2'
     `);
   } catch (e) {

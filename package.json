@@ -10,7 +10,8 @@
     "start": "node backend/server.js",
     "dev": "node backend/server.js",
     "test": "node test_fullstack.js",
-    "test:all": "node test_fullstack.js && node test_verification.js"
+    "test:emergency": "node test_emergency.js",
+    "test:all": "node test_fullstack.js && node test_verification.js && node test_emergency.js"
   },
   "dependencies": {
     "cors": "^2.8.6",

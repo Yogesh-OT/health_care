@@ -1,4 +1,4 @@
-﻿# 🧠 Smriti-NER — AI Dementia Cognitive Care Platform
+# 🧠 Smriti-NER — AI Dementia Cognitive Care Platform
 
 **SIH26003 | Smart India Hackathon 2026**
 
@@ -38,6 +38,7 @@ sihsoftware/
 │   │   ├── telemetryRoutes.js # GET|POST|DELETE /api/telemetry
 │   │   ├── remindersRoutes.js # GET|PUT|POST /api/reminders/:patient_id
 │   │   ├── messagesRoutes.js  # GET|POST /api/messages/:patient_id
+│   │   ├── emergencyRoutes.js # POST /api/emergency/send, GET /log (SOS Caretaker Alerts)
 │   │   └── syncRoutes.js    # POST /api/sync/edge (offline queue flush)
 │   └── data/
 │       └── smriti.db        # SQLite persistent database (auto-created)
@@ -93,6 +94,7 @@ sessions            -- Auth tokens (token, user_id, role, expires_at)
 activities_telemetry -- Cognitive game logs (patient_id, game_id, accuracy_pct, latency_seconds, ...)
 reminders           -- Daily living reminders (patient_id, type, title, is_completed, ...)
 messages            -- Doctor-Patient messaging (patient_id, doctor_id, sender_role, message_text, ...)
+emergency_alerts    -- Real-time distress logs (patient_id, caretaker_phone, message, status, ...)
 edge_sync_log       -- Offline sync audit log (patient_id, records_synced, status)
 ```
 
@@ -114,6 +116,10 @@ edge_sync_log       -- Offline sync audit log (patient_id, records_synced, statu
 | `POST` | `/api/reminders/:patient_id` | Create custom reminder (doctor prescription) |
 | `GET` | `/api/messages/:patient_id` | Doctor-patient message history |
 | `POST` | `/api/messages` | Send clinical note or patient reply |
+| `POST` | `/api/emergency/send` | 🚨 Trigger emergency SOS alert to caretaker |
+| `GET` | `/api/emergency/log` | Doctor view: recent emergency distress alerts |
+| `GET` | `/api/emergency/patient/:id` | Patient emergency history log |
+| `POST` | `/api/emergency/acknowledge/:id` | Mark emergency alert as attended/resolved |
 | `POST` | `/api/sync/edge` | Flush offline telemetry queue to server |
 | `GET` | `/api/health` | Health check endpoint |
 
@@ -276,6 +282,27 @@ MoCA     = clamp(round(baseMoCA - penalty + 2), 12, 30)
 - 18–25: Mild Cognitive Impairment (MCI)
 - 10–17: Moderate Dementia
 - <10: Severe Dementia
+
+---
+
+## 🚨 Emergency Caretaker Alert (SOS) System
+
+The platform features a **fully functional, zero-setup emergency distress system** designed for elderly dementia patients:
+
+1. **One-Tap SOS Trigger**:
+   - The patient taps the high-visibility red **"ALERT CARETAKER NOW"** button (≥68px touch target).
+   - An audio chime and comforting voice prompt confirm: *"Emergency alert dispatched to your caregiver."*
+2. **Instant Multi-Channel Dispatch (No API Key Required)**:
+   - **Direct WhatsApp Alert**: Automatically generates a pre-filled `https://wa.me/` direct dispatch link to the registered caretaker's phone number with full emergency context (patient name, age, location, timestamp).
+   - **Device SMS (`sms:`)**: Deep-links to the mobile/tablet's native SMS application with the pre-filled distress message.
+   - **Direct Phone Call (`tel:`)**: One-tap phone dialer to call the caretaker immediately.
+3. **Clinical Database Audit Trail**:
+   - Every emergency alert is persisted in the SQLite `emergency_alerts` table with timestamp and status.
+4. **Real-Time Doctor Emergency Banner**:
+   - The Doctor's Clinical Dashboard displays a prominent pulsing red banner whenever an SOS is triggered, showing the patient's name, caregiver contact details, and a quick-action button to call or WhatsApp the caregiver.
+5. **Optional Telecom SMS (MSG91)**:
+   - If an `MSG91_AUTH_KEY` environment variable is provided, the backend also dispatches an automated background SMS via MSG91's transactional API. If omitted, the system seamlessly functions using direct WhatsApp/SMS links and database auditing.
+
 
 ---
 

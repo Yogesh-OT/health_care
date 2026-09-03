@@ -281,6 +281,23 @@ const ApiClient = {
       method: 'POST',
       body: JSON.stringify(payload)
     });
+  },
+
+  sendEmergencyAlert(payload) {
+    return this.request('/emergency/send', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  },
+
+  getEmergencyLogs(limit = 20) {
+    return this.request(`/emergency/log?limit=${limit}`);
+  },
+
+  acknowledgeEmergencyAlert(alertId) {
+    return this.request(`/emergency/acknowledge/${alertId}`, {
+      method: 'POST'
+    });
   }
 };
 
@@ -2719,8 +2736,17 @@ class AuthController {
       audio.speak(`Welcome Dr. ${profile.name}. Doctor Clinical Telemetry unlocked.`);
       const firstPid = SMRITI_STATE.inspectedPatientId || 'p1';
       telemetry.fetchPatientTelemetry(firstPid);
+      if (typeof emergencyController !== 'undefined') {
+        emergencyController.checkDoctorEmergencyAlerts();
+      }
     } else {
       document.getElementById('welcomePatientName').textContent = profile.name;
+      // Populate caretaker contact display
+      const ctNameEl = document.getElementById('patientCaretakerNameDisplay');
+      const ctPhoneEl = document.getElementById('patientCaretakerPhoneDisplay');
+      if (ctNameEl) ctNameEl.textContent = profile.caretaker_name || 'Rupankar Baruah (Son)';
+      if (ctPhoneEl) ctPhoneEl.textContent = profile.caretaker_phone || '+91 98640 55443';
+
       document.getElementById('viewPatientHub').classList.add('active');
       audio.speak(`Hello ${profile.name}. Welcome back to your cognitive garden.`);
     }
@@ -2860,7 +2886,7 @@ class AuthController {
     }
   }
 
-  async signupPatient(name, age, email, password, location, phone, avatar, protocol) {
+  async signupPatient(name, age, email, password, location, phone, avatar, protocol, caretakerName) {
     const errEl = document.getElementById('signupPatientError');
     if (errEl) errEl.textContent = '';
 
@@ -2876,6 +2902,9 @@ class AuthController {
       return;
     }
 
+    const ctName = (caretakerName || 'Primary Caregiver').trim();
+    const ctPhone = phone ? phone.trim() : '+91 98640 55443';
+
     try {
       const res = await ApiClient.register({
         role: 'patient',
@@ -2885,7 +2914,9 @@ class AuthController {
         pin: password.trim(),
         age: parseInt(age, 10) || 70,
         location: (location || 'Assam, NER').trim(),
-        phone: phone ? phone.trim() : null,
+        phone: ctPhone,
+        caretaker_phone: ctPhone,
+        caretaker_name: ctName,
         avatar: avatar || '👴',
         protocol: protocol || 'Memory & Daily Routines'
       });
@@ -2913,7 +2944,9 @@ class AuthController {
       pin: password.trim(),
       age: parseInt(age, 10) || 70,
       location: (location || 'Assam, NER').trim(),
-      phone: phone ? phone.trim() : null,
+      phone: ctPhone,
+      caretaker_phone: ctPhone,
+      caretaker_name: ctName,
       avatar: avatar || '👴',
       protocol: protocol || 'Memory & Daily Routines',
       notes: 'Newly registered patient.',
@@ -3020,6 +3053,126 @@ class AuthController {
 }
 
 const auth = new AuthController();
+
+// ==========================================================================
+// 5.1 EMERGENCY CARETAKER ALERT CONTROLLER
+// ==========================================================================
+class EmergencyController {
+  constructor() {
+    this.activeAlert = null;
+  }
+
+  async triggerSOS(emergencyNote = 'Emergency SOS assistance requested from tablet') {
+    const patientId = SMRITI_STATE.activeProfile?.id || 'p1';
+    const patientName = SMRITI_STATE.activeProfile?.name || 'Elderly Patient';
+    const ctName = SMRITI_STATE.activeProfile?.caretaker_name || 'Rupankar Baruah (Son)';
+    const ctPhone = SMRITI_STATE.activeProfile?.caretaker_phone || '+91 98640 55443';
+
+    audio.playGentleChime();
+    audio.speak(`Emergency alert dispatched to your caregiver, ${ctName}.`);
+
+    // 1. Send to backend
+    try {
+      const res = await ApiClient.sendEmergencyAlert({
+        patient_id: patientId,
+        emergency_note: emergencyNote
+      });
+
+      if (res.ok && res.data) {
+        this.activeAlert = res.data;
+        this.showSOSModal(res.data);
+      } else {
+        // Offline / fallback payload
+        this.showFallbackSOSModal(patientName, ctName, ctPhone, emergencyNote);
+      }
+    } catch (err) {
+      console.warn('Emergency alert network error, using fallback:', err);
+      this.showFallbackSOSModal(patientName, ctName, ctPhone, emergencyNote);
+    }
+  }
+
+  showSOSModal(data) {
+    const modal = document.getElementById('modalEmergencySOS');
+    if (!modal) return;
+
+    const nameEl = document.getElementById('sosModalCaretakerName');
+    const phoneEl = document.getElementById('sosModalCaretakerPhone');
+    const msgEl = document.getElementById('sosModalMessagePreview');
+    const waBtn = document.getElementById('sosModalWhatsappBtn');
+    const smsBtn = document.getElementById('sosModalSmsBtn');
+    const callBtn = document.getElementById('sosModalCallBtn');
+
+    if (nameEl) nameEl.textContent = data.caretaker_name || 'Family Caregiver';
+    if (phoneEl) phoneEl.textContent = data.caretaker_phone || '+91 98640 55443';
+    if (msgEl) msgEl.textContent = `"${data.message}"`;
+
+    if (waBtn && data.whatsapp_url) {
+      waBtn.href = data.whatsapp_url;
+    }
+    if (smsBtn && data.sms_url) {
+      smsBtn.href = data.sms_url;
+    }
+    if (callBtn && data.call_url) {
+      callBtn.href = data.call_url;
+    }
+
+    modal.classList.add('open');
+  }
+
+  showFallbackSOSModal(patientName, ctName, ctPhone, note) {
+    const rawDigits = (ctPhone || '9864055443').replace(/\D/g, '');
+    const intlPhone = rawDigits.length === 10 ? '91' + rawDigits : rawDigits;
+    const msg = `🚨 SMRITI URGENT HEALTH ALERT: Patient ${patientName} needs immediate assistance! Note: ${note}. Caretaker: ${ctName}. Please check immediately.`;
+    const encoded = encodeURIComponent(msg);
+
+    this.showSOSModal({
+      caretaker_name: ctName,
+      caretaker_phone: ctPhone,
+      message: msg,
+      whatsapp_url: `https://wa.me/${intlPhone}?text=${encoded}`,
+      sms_url: `sms:${intlPhone}?body=${encoded}`,
+      call_url: `tel:${(ctPhone || '').replace(/\s+/g, '')}`
+    });
+  }
+
+  async checkDoctorEmergencyAlerts() {
+    try {
+      const res = await ApiClient.getEmergencyLogs(5);
+      if (res.ok && res.data?.data && res.data.data.length > 0) {
+        const unack = res.data.data.find(a => a.status === 'DISPATCHED');
+        const banner = document.getElementById('doctorEmergencyBanner');
+        if (unack && banner) {
+          banner.style.display = 'flex';
+          const nameEl = document.getElementById('docAlertPatientName');
+          const ctEl = document.getElementById('docAlertCaretaker');
+          const timeEl = document.getElementById('docAlertTime');
+          const callBtn = document.getElementById('btnDocCallCaretaker');
+          const waBtn = document.getElementById('btnDocWaCaretaker');
+          const ackBtn = document.getElementById('btnDocAckAlert');
+
+          if (nameEl) nameEl.textContent = unack.patient_name || 'Patient';
+          if (ctEl) ctEl.textContent = `${unack.caretaker_name || 'Caregiver'} (${unack.caretaker_phone})`;
+          if (timeEl) timeEl.textContent = new Date(unack.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+          const cleanPhone = (unack.caretaker_phone || '').replace(/\D/g, '');
+          const intl = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+          if (callBtn) callBtn.href = `tel:${unack.caretaker_phone.replace(/\s+/g, '')}`;
+          if (waBtn) waBtn.href = `https://wa.me/${intl}?text=${encodeURIComponent(`Doctor Anamika regarding urgent alert for ${unack.patient_name}`)}`;
+
+          if (ackBtn) {
+            ackBtn.onclick = async () => {
+              await ApiClient.acknowledgeEmergencyAlert(unack.id);
+              banner.style.display = 'none';
+              audio.speak('Emergency alert marked as attended.');
+            };
+          }
+        }
+      }
+    } catch (e) {}
+  }
+}
+
+const emergencyController = new EmergencyController();
 
 // ==========================================================================
 // 6. UTILITY FUNCTIONS
@@ -4128,6 +4281,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const email = document.getElementById('regPatientEmail')?.value;
     const password = document.getElementById('regPatientPassword')?.value;
     const loc = document.getElementById('regPatientLocation')?.value || 'Assam, NER';
+    const ctName = document.getElementById('regCaregiverName')?.value || 'Primary Caregiver';
     const phone = document.getElementById('regCaregiverPhone')?.value || '';
     const avatarRadio = document.querySelector('input[name="patientAvatar"]:checked');
     const avatar = avatarRadio ? avatarRadio.value : '👴';
@@ -4145,7 +4299,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    auth.signupPatient(name, age, email, password, loc, phone, avatar, protocol);
+    auth.signupPatient(name, age, email, password, loc, phone, avatar, protocol, ctName);
   });
 
   document.getElementById('formDoctorSignup')?.addEventListener('submit', (e) => {
@@ -4488,6 +4642,19 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnExportCSV')?.addEventListener('click', () => telemetry.exportCSV());
   document.getElementById('btnExportJSON')?.addEventListener('click', () => telemetry.exportJSON());
   document.getElementById('btnResetTelemetry')?.addEventListener('click', () => telemetry.resetTelemetry());
+
+  // Emergency Caretaker Assistance (SOS) Handlers
+  document.getElementById('btnTriggerSOS')?.addEventListener('click', () => {
+    emergencyController.triggerSOS();
+  });
+
+  document.getElementById('btnCloseEmergencyModal')?.addEventListener('click', () => {
+    document.getElementById('modalEmergencySOS')?.classList.remove('open');
+  });
+
+  document.getElementById('btnDismissSosModal')?.addEventListener('click', () => {
+    document.getElementById('modalEmergencySOS')?.classList.remove('open');
+  });
 
   // Initialize UI
   telemetry.updateDashboardUI();

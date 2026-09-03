@@ -10,6 +10,7 @@ const telemetryRoutes = require('./routes/telemetryRoutes');
 const remindersRoutes = require('./routes/remindersRoutes');
 const messagesRoutes = require('./routes/messagesRoutes');
 const syncRoutes = require('./routes/syncRoutes');
+const emergencyRoutes = require('./routes/emergencyRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -57,6 +58,7 @@ app.use('/api/telemetry', telemetryRoutes);
 app.use('/api/reminders', remindersRoutes);
 app.use('/api/messages', messagesRoutes);
 app.use('/api/sync', syncRoutes);
+app.use('/api/emergency', emergencyRoutes);
 
 // Health Check
 app.get('/api/health', (req, res) => {
